@@ -9,5 +9,5 @@
 * Frontend integration using Yesod : March 1, 2015 
  
 # Platforms Used
-Frontend - User management part : Ruby on Rails
-Backend for Correctness, Time, safe code authentication : Haskell
+* Frontend - User management part : Ruby on Rails
+* Backend for Correctness, Time, safe code authentication : Haskell
