@@ -1,6 +1,6 @@
 # conj
-Online Judge for Programs written in C
-ESC101 Project 
+* Online Judge for Programs written in C
+* ESC101 Project 
 
 # TimeLine
 * Backend for Time and Correctness : February 1, 2015 
