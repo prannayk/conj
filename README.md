@@ -7,6 +7,7 @@
 * Backend for User and Question management : February 20, 2015 
 * Backend for Jury : February 25, 2015 
 * Frontend integration using Yesod : March 1, 2015 
-
+ 
+# Platforms Used
 Frontend - User management part : Ruby on Rails
-Backend for Correctness test : Haskell
+Backend for Correctness, Time, safe code authentication : Haskell
