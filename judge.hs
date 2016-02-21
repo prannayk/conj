@@ -35,6 +35,7 @@ checkResult hout some inputf= (do
 
 testThis :: String -> String -> IO (Bool,NominalDiffTime,String)
 testThis some cas = do
+  setResourceLimit ResourceCPUTime ResourceLimits{hardLimit = ResourceLimit 5, softLimit = ResourceLimit 4}
   (Just hin,Just hout, _,_ ) <- createProcess (proc "./a.out" []){std_out =  CreatePipe, std_in = CreatePipe}
   hSetBuffering hin NoBuffering
   inputf <- openFile (some++"/"++cas) ReadMode
@@ -58,8 +59,8 @@ runTest some (cas:cases) = do
 
 check :: [(Bool,NominalDiffTime,String)] -> Bool
 check cases = foldl (\acc (x,_,_) ->
-  if (not $ x) then False else acc
-  ) True cases
+  if (x) then True else acc
+  ) False cases
 
 
 testStuff :: String -> IO Bool
