@@ -6,6 +6,8 @@ import Data.Time.Clock
 import Data.Maybe (isJust)
 import Data.Maybe (maybeToList)
 import System.Environment (getArgs)
+import qualified Data.Text as T
+import System.Posix.Resource
 
 putStuff :: Handle -> Handle -> IO()
 putStuff inputf hin = (do
@@ -70,8 +72,25 @@ testStuff some = do
   list <- runTest some (lines $ cases)
   return (check list)
 
+getNumberLeft :: String -> Integer
+getNumberLeft (x:some) = read $ some
+
+checkEmpty :: [(T.Text,T.Text)] -> Bool
+checkEmpty [] = True
+checkEmpty ((x,y):_) = False
+
+--heap_size :: [(T.Text,T.Text)] -> Integer
+--heap_size [] = 0
+--heap_size ((x,xs)) = let (ws,w) = last $ T.breakOnAll (T.pack "=") xs in getNumberLeft (T.unpack w)
+
+processMem :: IO ()
+processMem = do
+  buffer <- readFile "massif.out.1949"
+  putStrLn $ show $ maximum $ foldl (\acc [(x,y)] -> let (broken,want) = last $ T.breakOnAll (T.pack "=") y in (getNumberLeft (T.unpack want)):acc) [] $ foldl (\acc x -> if(not $ checkEmpty x) then x:acc else acc) [] $ map (T.breakOnAll (T.pack "mem_heap_B")) (map T.pack $ lines buffer)  
+
 main = do
   inpu <- getArgs
+  processMem
   some <- testStuff $ last $ inpu
   if (same True some) then do
     putStrLn $ (show) some
