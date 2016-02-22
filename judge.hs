@@ -35,10 +35,10 @@ checkResult hout some inputf= (do
       times <- getCurrentTime
       return (True,Just (diffUTCTime times timeo))))
 
-testThis :: String -> String -> IO (Bool,NominalDiffTime,String)
-testThis some cas = do
+testThis :: String -> String -> String -> IO (Bool,NominalDiffTime,String)
+testThis some cas user= do
   setResourceLimit ResourceCPUTime ResourceLimits{hardLimit = ResourceLimit 5, softLimit = ResourceLimit 4}
-  (Just hin,Just hout, _,_ ) <- createProcess (proc "./a.out" []){std_out =  CreatePipe, std_in = CreatePipe}
+  (Just hin,Just hout, _,_ ) <- createProcess (proc (user++"/"++some++"/"++some) []){std_out =  CreatePipe, std_in = CreatePipe}
   hSetBuffering hin NoBuffering
   inputf <- openFile (some++"/"++cas) ReadMode
   timeN <- getCurrentTime
@@ -50,12 +50,12 @@ testThis some cas = do
   timeNN <- getCurrentTime
   return (cool,(diffUTCTime timeNN (addUTCTime (head $ maybeToList timeT) timeN)),cas)
 
-runTest :: String -> [String] -> IO [(Bool,NominalDiffTime,String)]
-runTest some [] = do
+runTest :: String -> [String] -> String -> IO [(Bool,NominalDiffTime,String)]
+runTest _ [] _ = do
   return ([])
-runTest some (cas:cases) = do
-  x <- testThis some cas
-  list <- runTest some cases
+runTest some (cas:cases) user = do
+  x <- testThis some cas user
+  list <- runTest some cases user
   return (x:list)
 
 
@@ -65,11 +65,11 @@ check cases = foldl (\acc (x,_,_) ->
   ) False cases
 
 
-testStuff :: String -> IO Bool
+testStuff :: [String] -> IO Bool
 testStuff some = do
-  (_,Just hout,_,_) <- createProcess (proc "ls" [some]){std_out = CreatePipe}
+  (_,Just hout,_,_) <- createProcess (proc "ls" [(last some)]){std_out = CreatePipe}
   cases <- hGetContents hout
-  list <- runTest some (lines $ cases)
+  list <- runTest (last some) (lines $ cases) (first some)
   return (check list)
 
 getNumberLeft :: String -> Integer
@@ -79,9 +79,8 @@ checkEmpty :: [(T.Text,T.Text)] -> Bool
 checkEmpty [] = True
 checkEmpty ((x,y):_) = False
 
---heap_size :: [(T.Text,T.Text)] -> Integer
---heap_size [] = 0
---heap_size ((x,xs)) = let (ws,w) = last $ T.breakOnAll (T.pack "=") xs in getNumberLeft (T.unpack w)
+first :: [a] -> a
+first = foldr1 (\x _ -> x)
 
 processMem :: IO ()
 processMem = do
@@ -91,7 +90,9 @@ processMem = do
 main = do
   inpu <- getArgs
   processMem
-  some <- testStuff $ last $ inpu
+  some <- callCommand $ "gcc " ++ (first inpu) ++ "/" ++ (last inpu) ++ "/" ++ (last inpu) ++ ".c -o" ++ (first inpu) ++ "/" ++ (last inpu) ++ "/" ++ (last inpu)
+  putStrLn $ (show) some
+  some <- testStuff $ inpu
   if (same True some) then do
     putStrLn $ (show) some
   else
