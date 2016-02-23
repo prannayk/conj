@@ -35,7 +35,7 @@ checkResult hout some inputf= (do
       times <- getCurrentTime
       return (True,Just (diffUTCTime times timeo))))
 
-testThis :: String -> String -> String -> IO (Bool,NominalDiffTime,String)
+testThis :: String -> String -> String -> IO (Bool,NominalDiffTime,String,Integer)
 testThis some cas user= do
   setResourceLimit ResourceCPUTime ResourceLimits{hardLimit = ResourceLimit 5, softLimit = ResourceLimit 4}
   (Just hin,Just hout, _,_ ) <- createProcess (proc (user++"/"++some++"/"++some) []){std_out =  CreatePipe, std_in = CreatePipe}
@@ -48,9 +48,19 @@ testThis some cas user= do
   hSetBuffering inputAns NoBuffering
   (cool,timeT) <- checkResult hout some inputAns
   timeNN <- getCurrentTime
-  return (cool,(diffUTCTime timeNN (addUTCTime (head $ maybeToList timeT) timeN)),cas)
+  memTest some cas user
+  memory <- processMem user some
+  putStrLn $ (show) memory
+  return (cool,(diffUTCTime timeNN (addUTCTime (head $ maybeToList timeT) timeN)),cas,memory)
 
-runTest :: String -> [String] -> String -> IO [(Bool,NominalDiffTime,String)]
+memTest :: String -> String -> String -> IO (Bool)
+memTest some cas user = do
+  setResourceLimit ResourceCPUTime ResourceLimits{hardLimit = ResourceLimit 5, softLimit = ResourceLimit 4}
+  inputf <- readFile (some++"/"++cas)
+  some <- readCreateProcessWithExitCode (shell ("valgrind --tool=massif --massif-out-file='"++user++"/"++some++"/mem' " ++ user++"/"++some++"/"++some)) inputf
+  return (True)
+
+runTest :: String -> [String] -> String -> IO [(Bool,NominalDiffTime,String,Integer)]
 runTest _ [] _ = do
   return ([])
 runTest some (cas:cases) user = do
@@ -59,8 +69,8 @@ runTest some (cas:cases) user = do
   return (x:list)
 
 
-check :: [(Bool,NominalDiffTime,String)] -> Bool
-check cases = foldl (\acc (x,_,_) ->
+check :: [(Bool,NominalDiffTime,String,Integer)] -> Bool
+check cases = foldl (\acc (x,_,_,_) ->
   if (x) then True else acc
   ) False cases
 
@@ -82,18 +92,19 @@ checkEmpty ((x,y):_) = False
 first :: [a] -> a
 first = foldr1 (\x _ -> x)
 
-processMem :: IO ()
-processMem = do
-  buffer <- readFile "massif.out.1949"
-  putStrLn $ show $ maximum $ foldl (\acc [(x,y)] -> let (broken,want) = last $ T.breakOnAll (T.pack "=") y in (getNumberLeft (T.unpack want)):acc) [] $ foldl (\acc x -> if(not $ checkEmpty x) then x:acc else acc) [] $ map (T.breakOnAll (T.pack "mem_heap_B")) (map T.pack $ lines buffer)  
+processMem :: String -> String -> IO (Integer)
+processMem user ques= do
+  buffer <- readFile (user++"/"++ques++"/mem")
+  return (maximum $ foldl (\acc [(x,y)] -> let (broken,want) = last $ T.breakOnAll (T.pack "=") y in (getNumberLeft (T.unpack want)):acc) [] $ foldl (\acc x -> if(not $ checkEmpty x) then x:acc else acc) [] $ map (T.breakOnAll (T.pack "mem_heap_B")) (map T.pack $ lines buffer) )
 
 main = do
   inpu <- getArgs
-  processMem
   some <- callCommand $ "gcc " ++ (first inpu) ++ "/" ++ (last inpu) ++ "/" ++ (last inpu) ++ ".c -o" ++ (first inpu) ++ "/" ++ (last inpu) ++ "/" ++ (last inpu)
-  putStrLn $ (show) some
-  some <- testStuff $ inpu
-  if (same True some) then do
-    putStrLn $ (show) some
-  else
-    putStrLn "False"
+  if(same some ()) then do
+    some <- testStuff $ inpu
+    if (same True some) then do
+      putStrLn $ (show) some
+    else
+      putStrLn "False"
+  else 
+    putStrLn "Compile Failed"
