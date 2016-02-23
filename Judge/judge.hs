@@ -8,6 +8,7 @@ import Data.Maybe (maybeToList)
 import System.Environment (getArgs)
 import qualified Data.Text as T
 import System.Posix.Resource
+import System.Exit
 
 putStuff :: Handle -> Handle -> IO()
 putStuff inputf hin = (do
@@ -50,7 +51,7 @@ testThis some cas user= do
   timeNN <- getCurrentTime
   memTest some cas user
   memory <- processMem user some
-  putStrLn $ (show) memory
+  putStrLn $ "Memory: "++(show) memory
   return (cool,(diffUTCTime timeNN (addUTCTime (head $ maybeToList timeT) timeN)),cas,memory)
 
 memTest :: String -> String -> String -> IO (Bool)
@@ -99,8 +100,9 @@ processMem user ques= do
 
 main = do
   inpu <- getArgs
-  some <- callCommand $ "gcc " ++ (first inpu) ++ "/" ++ (last inpu) ++ "/" ++ (last inpu) ++ ".c -o" ++ (first inpu) ++ "/" ++ (last inpu) ++ "/" ++ (last inpu)
-  if(same some ()) then do
+  (compile,_,_) <- readCreateProcessWithExitCode (shell ("gcc " ++ (first inpu) ++ "/" ++ (last inpu) ++ "/" ++ (last inpu) ++ ".c -o " ++ (first inpu) ++ "/" ++ (last inpu) ++ "/" ++ (last inpu))) ""
+  putStrLn $ (show) compile
+  if(same compile ExitSuccess) then do
     some <- testStuff $ inpu
     if (same True some) then do
       putStrLn $ (show) some
