@@ -20,6 +20,7 @@ drop :: [a] -> Integer -> [a]
 drop [] _ = []
 drop (x:xs) n
 	| n <= 0 = (x:xs)
-	| len > n = Main.drop xs (n-1)
-	| len <= n = [] 
+	| len > n = Main.drop xs n
+	| len < n = [] 
+	| otherwise = (x:xs)
 	where len = Main.length (x:xs) 
