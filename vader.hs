@@ -4,6 +4,5 @@ import System.Process
 
 main = do
 	input <- getArgs
-
 	(_,stdout,_) <- readCreateProcessWithExitCode ((proc "Judge/judge" input ) {cwd = Just "Judge/"}) ""
-	putStrLn $ last $ lines stdout
+	putStr stdout

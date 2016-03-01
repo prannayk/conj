@@ -1,5 +1,3 @@
-module Judge where 
-
 import System.Process
 import Data.ByteString(hPut)
 import Control.Monad (when)
@@ -55,13 +53,12 @@ testThis some cas user= do
   (cool,timeT) <- checkResult hout some inputAns
   timeNN <- getCurrentTime
   code <- getProcessExitCode handle
-  if(code == Nothing) then do
+  if(code /= Nothing) then do
     error<- memTest some cas user
     if(error == MemoryExceeded) then do
       return (Left MemoryExceeded)
     else do
       memory <- processMem user some
-      putStrLn $ "Memory: "++(show) memory
       return (Right (cool,(diffUTCTime timeNN (addUTCTime (head $ maybeToList timeT) timeN)),cas,memory))
   else do
     return (Left TimeExceeded)
@@ -143,11 +140,11 @@ compileCode inpu = do
 
 lineE :: Rerror -> String
 lineE (Left err) = (show)err
-lineE (Right (bool,nominalDiffTime,_,integer)) = ((show)bool) ++ ((show)nominalDiffTime) ++ ((show)integer)
+lineE (Right (bool,nominalDiffTime,_,integer)) = ((show)bool) ++ "|" ++ ((show)nominalDiffTime) ++ "|" ++ ((show)integer)
 
 writeLog :: [String] -> Rerror -> IO ()
 writeLog (user:_) matter = do
-  withFile (user++"/log.txt") AppendMode (\handle -> do hPutStrLn handle $ user ++ (lineE matter) )
+  withFile (user++"/log.txt") AppendMode (\handle -> do hPutStrLn handle $ user ++ "|" ++ (lineE matter) )
 
 
 main = do
