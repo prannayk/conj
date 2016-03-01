@@ -12,7 +12,8 @@ import qualified Data.Text as T
 import System.Posix.Resource
 import System.Exit
 import Layout
-import Data.Either (lefts,rights)
+import Data.Either (lefts,rights, isLeft)
+import Data.List (nub)
 
 putStuff :: Handle -> Handle -> IO()
 putStuff inputf hin = (do
@@ -55,11 +56,14 @@ testThis some cas user= do
   timeNN <- getCurrentTime
   code <- getProcessExitCode handle
   if(code == Nothing) then do
-    memTest some cas user
-    memory <- processMem user some
-    putStrLn $ "Memory: "++(show) memory
-    return (Right (cool,(diffUTCTime timeNN (addUTCTime (head $ maybeToList timeT) timeN)),cas,memory))
-  else 
+    error<- memTest some cas user
+    if(error == MemoryExceeded) then do
+      return (Left MemoryExceeded)
+    else do
+      memory <- processMem user some
+      putStrLn $ "Memory: "++(show) memory
+      return (Right (cool,(diffUTCTime timeNN (addUTCTime (head $ maybeToList timeT) timeN)),cas,memory))
+  else do
     return (Left TimeExceeded)
 
 
@@ -70,7 +74,7 @@ memTest some cas user = do
   (some,_,_) <- readCreateProcessWithExitCode (shell ("valgrind --tool=massif --massif-out-file='"++user++"/"++some++"/mem' " ++ user++"/"++some++"/"++some)) inputf
   if(some == ExitSuccess) then
     return (NoError)
-  else 
+  else do
     return MemoryExceeded
 
 runTest :: String -> [String] -> String -> IO [Rerror]
@@ -81,22 +85,34 @@ runTest some (cas:cases) user = do
   list <- runTest some cases user
   return (x:list)
 
-check :: [(Bool,NominalDiffTime,String,Integer)] -> [Error] -> Bool
-check cases [] = checkRight cases
-check _ (x:xs) = False 
+check :: [(Bool,NominalDiffTime,String,Integer)] -> [Error] -> IO (Berror)
+check boolList [] = return (Right $ checkRight boolList)
+check boolList (x:xs) = return (Left $ checkLeft (x:xs))
 
 checkRight :: [(Bool,NominalDiffTime,String,Integer)] -> Bool
 checkRight cases = foldl (\acc (x,_,_,_) ->
   if (x) then True else acc
   ) False cases
 
+checkLeft :: [Error] -> Error
+checkLeft errList = head $ nub errList
 
-testStuff :: [String] -> IO Bool
+leftShit :: Either a b -> a
+leftShit (Left a) = a
+
+rightShit :: Either a b -> b
+rightShit (Right b) = b
+
+testStuff :: [String] -> IO Rerror
 testStuff some = do
   (_,Just hout,_,_) <- createProcess (proc "ls" [(last some)]){std_out = CreatePipe}
   cases <- hGetContents hout
   list <- runTest (last some) (lines $ cases) (first some)
-  return (check (rights list) (lefts list))
+  boolean <- (check (rights list) (lefts list))
+  if (isLeft boolean) then do
+    return (Left $ leftShit boolean)
+  else do
+    return (Right ((rightShit boolean),(maxTime (rights list)),(first some),(maxMemory (rights list))))
 
 getNumberLeft :: String -> Integer
 getNumberLeft (x:some) = read $ some
@@ -125,14 +141,20 @@ compileCode inpu = do
   if(same compile ExitSuccess) then return (NoError)
   else return (CompileFail)
 
+lineE :: Rerror -> String
+lineE (Left err) = (show)err
+lineE (Right (bool,nominalDiffTime,_,integer)) = ((show)bool) ++ ((show)nominalDiffTime) ++ ((show)integer)
+
+writeLog :: [String] -> Rerror -> IO ()
+writeLog (user:_) matter = do
+  withFile (user++"/log.txt") AppendMode (\handle -> do hPutStrLn handle $ user ++ (lineE matter) )
+
+
 main = do
   inpu <- getArgs
   err <- compileCode inpu
-  if(err == NoError) then do
-    some <- testStuff $ inpu
-    if (same True some) then do
-      putStrLn $ (show) some
-    else
-      putStrLn "False"
-  else 
-    putStrLn "Compile Failed"
+  if(err == CompileFail) then do
+    writeLog inpu (Left err)
+  else do
+    err <- testStuff inpu
+    writeLog inpu err
