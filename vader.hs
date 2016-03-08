@@ -1,8 +1,25 @@
 import System.IO
 import System.Environment(getArgs)
 import System.Process
+import qualified Data.ByteString.Char8 as Byte
+import Control.Concurrent
+import System.Exit
+
+first :: [a] -> a
+first (x:xs) = x
+
+give :: Byte.ByteString -> [[String]]
+give file = map (map (Byte.unpack)) $ fmap (Byte.split '|') $ (Byte.split '\n' file)
+
+mapping :: [[String]] -> IO (Maybe a)
+mapping (x:xs) = do
+	--forkIO $ do
+		list <- readCreateProcessWithExitCode ((proc "Judge/judge" (x) ) {cwd = Just "Judge/"}) ""
+		some <- mapping xs
+		return Nothing
+mapping [] = do return Nothing
 
 main = do
-	input <- getArgs
-	(_,stdout,_) <- readCreateProcessWithExitCode ((proc "Judge/judge" input ) {cwd = Just "Judge/"}) ""
-	putStr stdout
+	input <- Byte.readFile "request.txt"
+	mapping $ give input
+	return ()

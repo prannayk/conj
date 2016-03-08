@@ -143,8 +143,9 @@ lineE (Left err) = (show)err
 lineE (Right (bool,nominalDiffTime,_,integer)) = ((show)bool) ++ "|" ++ ((show)nominalDiffTime) ++ "|" ++ ((show)integer)
 
 writeLog :: [String] -> Rerror -> IO ()
-writeLog (user:_) matter = do
-  withFile (user++"/log.txt") AppendMode (\handle -> do hPutStrLn handle $ user ++ "|" ++ (lineE matter) )
+writeLog (user:ques:_) matter = do
+  withFile (user++"/log.txt") AppendMode (\handle -> do hPutStrLn handle $ "\n" ++ user ++ "|" ++ (lineE matter) )
+  withFile (ques++"-log.txt") AppendMode (\handle -> do hPutStrLn handle $ "\n" ++ user ++ "|" ++ (lineE matter) )
 
 
 main = do
