@@ -1,0 +1,17 @@
+{% extends 'layout.html' %}
+{% block content %}
+	<table class="table">
+		<tr>
+			<th>Rank</th>
+			<th>Username</th>
+			<th>Score</th>
+		</tr>
+		{% for user in users %}
+			<tr>
+				<td>{{user.rank}}</td>
+				<td>{{user.name}}</td>
+				<td>{{user.score}}</td>
+			</tr>
+		{% endfor %}
+	</table>
+{% endblock %}

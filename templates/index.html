@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block content %}
+        <div class="jumbotron">
+            {% if fields.name %}
+            <p>Welcome, <i>{{fields.name}}</i></p>
+            {% endif %}
+            <h1>Creative Online Judge</h1>
+            <p class="lead"></p>
+            <p><a class="btn btn-lg btn-success" href="showSignUp" role="button">Sign up now</a>
+            <a class="btn btn-lg btn-success" href="showSignIn" role="button">Sign In now</a>
+            </p>
+        </div>
+        <div class="row marketing">
+            <div class="col-lg-6">
+                <h4>Front end</h4>
+                <p>Front-end code has been written in python for effective development.</p>
+ 
+                <h4>Back end</h4>
+                <p>The entire backend for code compilation and checks for safe code as well as correct code have been written in Haskell.</p>
+            </div>
+        </div>
+{% endblock %}

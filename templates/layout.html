@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+ 
+<head>
+    <title>CONJ | IIT Kanpur</title>
+ 
+ 
+    <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
+ 
+    <link href="http://getbootstrap.com/examples/jumbotron-narrow/jumbotron-narrow.css" rel="stylesheet">
+    {% block head %}
+    {% endblock %}
+</head>
+ 
+<body>
+    <div class="container">
+        <div class="header">
+            <nav>
+                <ul class="nav nav-pills pull-right">
+                    <li role="presentation"><a href="/">Home</a>
+                    </li>
+                    <li role="presentation"><a href="{{fields.url}}">{{fields.title}}</a>
+                    </li>
+                    <li role="presentation"><a href="leaderBoard">LeaderBoard</a></li>
+                </ul>
+            </nav>
+            <h3 class="text-muted">Online Judge</h3>
+        </div>
+        {% block content %}
+        {% endblock %}
+        <footer class="footer">
+            <p>&copy; Prannay Khosla 2016</p>
+            <p>Built with love for ESC101</p>
+        </footer>
+ 
+    </div>
+</body>
+ 
+</html>

@@ -1,0 +1,33 @@
+{% extends 'layout.html' %}
+{% block head %}
+  <style type="text/css">
+  input{
+
+    margin: 8px auto;
+    max-width: 300px;
+  }
+  #error{
+    height: 20px;
+    margin: auto;
+    display: block;
+  }
+  </style>
+{% endblock %}
+{% block content %}
+      <div class="jumbotron">
+        <h1>Creative Online Judge</h1>
+        <span id="error">{{error}}</span>
+        <form class="form-signin" action="/signIn" method="post">
+        <label for="inputUsername" class="sr-only">Username</label>
+        <input type="text" name="inputUsername" id="inputUsername" class="form-control" placeholder="Username" required autofocus>
+        <label for="inputPassword" class="sr-only">Password</label>
+        <input type="password" name="inputPassword" id="inputPassword" class="form-control" placeholder="Password" required>
+         
+        <button id="btnSignIn" class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+      </form>
+      </div>
+      <div class="jumbotron">
+        <p>Haven't signed up yet?</p>
+        <a href="showSignUp">Sign Up Now</a>
+      </div>
+{% endblock %}

@@ -50,7 +50,7 @@ def userHome() :
 
 @app.route("/logout")
 def logout() :
-	session.pop('user',Null)
+	session.pop('user',None)
 	return redirect('/')
 
 @app.route("/signIn",methods=['POST'])
