@@ -1,6 +1,8 @@
+from __future__ import print_function
 from flask import Flask, request, json, render_template, session, redirect
 from flask.ext.bcrypt import Bcrypt
 from flask.ext.mysql import MySQL
+import sys
 
 app = Flask("Judge")
 bcrypt = Bcrypt(app)
@@ -47,6 +49,37 @@ class placeholders():
 		self.username = username
 		self.password = password
 		self.email = email
+
+class ques_list():
+	def __init__(self,head):
+		self.head = head
+		self.questions = []
+
+class qdesc():
+	def __init__(self,title,vattempt,attempt,content,id):
+		self.title = title
+		self.vattempt = vattempt
+		self.attempt = attempt
+		self.content = content
+		self.link = 'question/'+str(id)
+
+def question(id):
+	conn = mysql.connect()
+	cursor = conn.cursor()
+	cursor.callproc('getQues',(id,))
+	data = cursor.fetchall()
+	if len(data) is 0 :
+		return None
+	else :
+		return qdesc(data[0][1],str(data[0][8]),str(data[0][9]),str(data[0][5]),str(id))
+
+@app.route("/question/<quesid>",methods=['GET'])
+def render_question(quesid):
+	if quesid: 
+		return render_template('question.html',fields=fields,ques=question(quesid))
+	else:
+		return redirect('/userhome')
+
 @app.route("/")
 def main():
 	if session.get('user'):
@@ -55,10 +88,30 @@ def main():
 
 @app.route("/userHome")
 def userHome():
-	if session.get('confirm') : 
-		return render_template('userhome.html',fields=fields)
-	else : 
-		return render_template('confirmmail.html',fields=fields)
+	try : 
+		if session.get('user') : 
+			conn = mysql.connect()
+			cursor = conn.cursor()
+			cursor.callproc('getUser',((str(session['user'])),))
+			data = cursor.fetchall()
+			attempted = ques_list('header')
+			unattempted = ques_list('header')
+			for i in range(7,len(data[0])):
+				if data[0][i] == 0:
+					unattempted.questions.append(question(i-6))
+				else :
+					attempted.questions.append(question(i-6))
+			if len(attempted.questions) is 0:
+				attempted.head = None
+			if len(unattempted.questions) is 0:
+				unattempted.head = None
+			cursor.close()
+			conn.close()
+			return render_template('userhome.html',fields=fields,unattempted=unattempted,attempted=attempted)
+		else : 
+			return render_template('signin.html',fields=fields)
+	except Exception as e:
+		return render_template('error.html',error=e,fields=fields)
 
 @app.route("/showSignIn")
 def showSignIn():

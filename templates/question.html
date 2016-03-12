@@ -1,0 +1,30 @@
+{% extends 'layout.html' %}
+{% block content %}
+	<h4>{{ques.title}}</h4>
+	<div class="stats">
+		<table class="table">
+			<tr>
+				<th>Valid Attempts</th>
+				<th>Attempts</th>
+			</tr>
+			<tr>
+				<td>{{ques.vattempt}}</td>
+				<td>{{ques.attempt}}</td>
+			</tr>
+		</table>
+	</div>
+	<div class="row">
+		<div class="col-md-10">
+			<p>
+				{{ques.content}}
+			</p>
+		</div>
+	</div>
+	<div class="submission">
+		I am submitting code in : 
+		<select name="language">
+			<option default>-select-</option>
+			<option>C (gcc)</option>
+		</select>
+	</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+	{% if unattempted.head %}
+		<h4>Unattempted Questions</h4>
+	<div class="question list">
+		<table class="table">
+			<tr>
+				<th>Title</th>
+				<th>Attempts</th>
+				<th>Valid Attempts</th>
+			</tr>
+			{% for question in unattempted.questions %}
+				<tr>
+					<td><a href="{{question.link}}">{{question.title}}</a></td>
+					<td>{{question.attempt}}</td>
+					<td>{{question.vattempt}}</td>
+				</tr>
+			{% endfor %}
+		</table>
+	</div>
+	{% endif %}
+	{% if attempted.head %}
+	<h4>Attempted Questions</h4>
+	<div class="question list">
+		<table class="table">
+			<tr>
+				<th>Title</th>
+				<th>Attempts</th>
+				<th>Valid Attempts</th>
+			</tr>
+			{% for question in attempted.questions %}
+				<tr>
+					<td><a href="{{question.link}}">{{question.title}}</a></td>
+					<td>{{question.attempts}}</td>
+					<td>{{question.validAttempts}}</td>
+				</tr>
+			{% endfor %}
+		</table>
+	</div>
+	{% endif %}
+{% endblock %}
