@@ -128,7 +128,7 @@ def signIn():
 		_username = request.form['inputUsername']
 		_password = request.form['inputPassword']
 		conn.commit
-		cursor.callproc('validLogin',(_username,))
+		cursor.callproc('getUser',(_username,))
 		data = cursor.fetchall()
 		if len(data) > 0:
 			if(bcrypt.check_password_hash(str(data[0][3]),_password)):
@@ -165,7 +165,7 @@ def leaderBoard():
 		users = []
 		if len(data) > 0 :
 			for i in range(len(data)):
-				this = user(str(data[i][4]),str(data[i][5]),i+1)
+				this = user(str(data[i][1]),str(data[i][6]),i+1)
 				users.append(this)
 			return render_template('leaders.html',fields=fields,users=users)
 		else:
@@ -192,7 +192,7 @@ def signUp():
 		else:
 			return redirect("/")
 	except Exception as e:
-		return render_template('error.html',error=e)
+		return render_template('error.html',error=e,fields=fields)
 
 app.debug = True
 app.run()

@@ -1,6 +1,9 @@
 {% extends 'layout.html' %}
 
 {% block content %}
+	{% if fields.name %}
+	<p>Welcome, <i>{{fields.name}}</i></p>
+	{% endif %}
 	{% if unattempted.head %}
 		<h4>Unattempted Questions</h4>
 	<div class="question list">

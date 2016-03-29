@@ -1,0 +1,41 @@
+mysql -u root -p
+drasnac32
+create database `conj`
+
+CREATE TABLE `users` (
+user_userid BIGINT NOT NULL AUTO_INCREMENT,
+user_username VARCHAR (45),
+user_name VARCHAR (45),
+user_password VARCHAR (75),
+user_email VARCHAR (60),
+user_hash VARCHAR (75),
+user_score INT
+PRIMARY KEY ('user_userid')
+);
+
+-- following rows will be for every question and if the given score is 0 then the question is unattempted. At each time score is updated, score will be implemented
+
+CREATE TABLE `questions` 
+( 
+ques_id BIGINT NOT NULL AUTO_INCREMENT, 
+ques_title VARCHAR (60), 
+ques_afolder VARCHAR (60), 
+ques_testfolder VARCHAR (60), 
+ques_ownerid BIGINT, 
+ques_content VARCHAR (500), 
+ques_modtime TIMESTAMP, 
+ques_addtime TIMESTAMP,
+ques_attempts BIGINT ,
+ques_validattempts BIGINT,
+PRIMARY KEY (`ques_id`)
+);
+
+DELIMITER $$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getQues`( IN p_id BIGINT  ) BEGIN select * from `questions` where ques_id = p_id; END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getUser`( IN p_username VARCHAR(45) ) BEGIN select * from `users` where user_username = p_username; END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `listLeaders` () BEGIN select * from `users`; END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `createUser` ( IN p_name VARCHAR(45), IN p_email VARCHAR(60), IN p_username VARCHAR (45), IN p_password VARCHAR(75), IN p_hash VARCHAR(75) ) BEGIN if (select exists (select 1 from `users` where user_username = p_username) ) THEN select 'Shit just went down'; ELSE insert into `users` ( user_username, user_name, user_password, user_email, user_hash, user_score ) values ( p_username, p_name, p_password, p_email, p_hash, 0 ); END IF; END$$
