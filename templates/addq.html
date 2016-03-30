@@ -1,0 +1,83 @@
+{% extends 'layout.html' %}
+
+{% block head %}
+<style type="text/css">
+textarea {
+	width:100%;
+}
+</style>
+<script type="text/javascript">
+function question(num){
+		
+	var some = '<div class="test-case">';
+	some+= '<input type="checkbox" checked name="test'+ num + '-activity" />';
+	some+= '<input type="text" name="test'+ num + '-name" placeholder="Name of test case"/>';
+	some+= '<textarea name="test'+ num + '-input"></textarea>';
+	some+= '<textarea name="test'+ num + '-output"></textarea>';
+	some+= '</div>';
+	return some;
+};
+function some(){
+	$('#add-case').click(function(){
+		var some = $('.test-case').last().html();
+		$('.test-case').last().remove();
+		var num = parseInt($('.test-case').length);
+		$('.case-list').append(question(num));
+		$('.case-list').append('<div class="test-case">' + some + '</div>');
+		check();
+	});
+};
+function check(){
+	some();
+}
+$(function(){some();});
+$(function(){
+	$('#submit-cases').click(function(){
+		var num = parseInt($('test-case').length) - 1;
+		$('input[name="case_count"]').attr('value',num);
+		$.ajax({
+			url : "/jury/addQuestion",
+			data : $('form').serialize(),
+			type : 'POST',
+			success: function(response) {
+				console.log(response);
+			},
+			error : function(error) {
+				console.log(error);
+			}
+		});
+	});
+});
+</script>
+{% endblock %}
+
+{%block content %}
+<form name="test-cases" method="POST" action="/jury/addQuestion">
+<input type="hidden" name="case_count" value="1"/>
+<div class="row">
+	<div class="col-md-3">
+		<label for="question-title">Header:</label>
+	</div>
+	<div class="col-md-9">
+		<input type="text" name="question-title" placeholder="Question Title">
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-10">
+		<textarea name="question_content"></textarea>	
+	</div>
+</div>
+<div class="case-list">
+	<div class="test-case">
+		<input type="checkbox" checked name="test1-activity" />
+		<input type="text" name="test1-name" placeholder="Name of test case"/>
+		<textarea name="test1-input"></textarea>
+		<textarea name="test1-output"></textarea>
+	</div>
+	<div class="test-case">
+		<p class="add-case"><a href="#" id="add-case">+</a></p>
+	</div>
+</div>
+<a href="#" id="submit-cases">Submit</a>
+</form>
+{% endblock %}

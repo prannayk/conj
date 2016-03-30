@@ -39,3 +39,5 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getUser`( IN p_username VARCHAR(45)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `listLeaders` () BEGIN select * from `users`; END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `createUser` ( IN p_name VARCHAR(45), IN p_email VARCHAR(60), IN p_username VARCHAR (45), IN p_password VARCHAR(75), IN p_hash VARCHAR(75) ) BEGIN if (select exists (select 1 from `users` where user_username = p_username) ) THEN select 'Shit just went down'; ELSE insert into `users` ( user_username, user_name, user_password, user_email, user_hash, user_score ) values ( p_username, p_name, p_password, p_email, p_hash, 0 ); END IF; END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getQuestions` ( IN p_username VARCHAR(45)) BEGIN select * from `questions` where ques_owner_username = p_username; END$$       

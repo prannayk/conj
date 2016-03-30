@@ -2,6 +2,7 @@ from __future__ import print_function
 from flask import Flask, request, json, render_template, session, redirect
 from flask.ext.bcrypt import Bcrypt
 from flask.ext.mysql import MySQL
+from subprocess import call
 import sys
 
 app = Flask("Judge")
@@ -72,6 +73,26 @@ def question(id):
 		return None
 	else :
 		return qdesc(data[0][1],str(data[0][8]),str(data[0][9]),str(data[0][5]),str(id))
+def checkAccess():
+	if session.get('user'):
+		conn = mysql.connect()
+		cursor = conn.cursor()
+		cursor.callproc('getUser',(str(session['user']),))
+		data = cursor.fetchall()
+		if len(data) is 0 :
+			session['juryaccess'] = 0
+		else :
+			session['juryaccess'] = int(data[0][7])
+	else :
+		session['juryaccess'] = 0
+
+
+def writeCase(inputt,outputt,name,title):
+	with open('Judge/'+name+'/'+title,"w") as inputf:	
+		inputf.write(inputt)	
+	outputf = open('Judge/ans/'+name+'/'+title,"w")
+	outputf.write(outputt)
+	outputf.close()
 
 @app.route("/question/<quesid>",methods=['GET'])
 def render_question(quesid):
@@ -85,6 +106,27 @@ def main():
 	if session.get('user'):
 		fields.change('Logout','logout',session['user'])
 	return render_template("index.html",fields=fields,active='home')
+
+@app.route("/jury")
+def jury():
+	try :
+			if int(session['juryaccess']) == 1:
+				conn = mysql.connect()
+				cursor = conn.cursor()
+				cursor.callproc('getQuestions',((str(session['user'])),))
+				data = cursor.fetchall()
+				access = ques_list('header')
+				for i in range(len(data)):
+					access.questions.append(ques_d(data[i]))
+				if len(access.questions) is 0 : 
+					access.head = None
+				cursor.close()
+				conn.close()
+				return render_template('jury.html',fields=fields,questions=access)
+			else :
+				return render_template('error.html',fields=fields,error='Access to this part is restricted. If you are seeing this, please go away and never come back!')
+	except Exception as e :
+		return render_template('error.html',fields=fields,error=e) 
 
 @app.route("/userHome")
 def userHome():
@@ -113,6 +155,25 @@ def userHome():
 	except Exception as e:
 		return render_template('error.html',error=e,fields=fields)
 
+@app.route("/jury/addq")
+def addq():
+	return render_template("addq.html",fields=fields)
+
+@app.route("/jury/addQuestion",methods=['POST'])
+def addQuestion():
+	try :
+		test_case = []
+		_num = int(request.form['case_count'])
+		title = request.form['question-title']
+#		call(["cd ~/ESC101/conj/Judge"])
+#		call(["mkdir ~/ESC101/conj/Judge/"+title])
+#		call(["mkdir Judge/ans/"+title,""])
+		for i in range(_num):
+			writeCase(request.form['test'+i+'-input'],request.form['test'+i+'-output'],request.form['test'+i+'name'],title)
+		return 'Success'
+	except Exception as e : 
+		return str(e)
+
 @app.route("/showSignIn")
 def showSignIn():
 	if(session.get('user')) :
@@ -133,6 +194,7 @@ def signIn():
 		if len(data) > 0:
 			if(bcrypt.check_password_hash(str(data[0][3]),_password)):
 				session['user'] = str(data[0][1])
+				session['juryaccess'] = str(data[0][7])
 				fields.change('Logout','logout',session['user'])
 				return redirect('/')
 			else:
