@@ -4,8 +4,13 @@ from flask.ext.bcrypt import Bcrypt
 from flask.ext.mysql import MySQL
 from subprocess import call
 import sys
+import os
+from werkzeug import secure_filename
+
+uploadF = "submissions"
 
 app = Flask("Judge")
+app.config['UPLOAD_FOLDER'] = uploadF
 bcrypt = Bcrypt(app)
 app.secret_key = "tobeornot3be"
 
@@ -57,7 +62,7 @@ class ques_list():
 		self.questions = []
 
 class qdesc():
-	def __init__(self,title,vattempt,attempt,content,id):
+	def __init__(self,title,attempt,vattempt,content,id):
 		self.title = title
 		self.vattempt = vattempt
 		self.attempt = attempt
@@ -72,7 +77,7 @@ def question(id):
 	if len(data) is 0 :
 		return None
 	else :
-		return qdesc(data[0][1],str(data[0][8]),str(data[0][9]),str(data[0][5]),str(id))
+		return qdesc(str(data[0][1]),str(data[0][8]),str(data[0][9]),str(data[0][5]),str(id))
 def checkAccess():
 	if session.get('user'):
 		conn = mysql.connect()
@@ -86,14 +91,6 @@ def checkAccess():
 	else :
 		session['juryaccess'] = 0
 
-
-def writeCase(inputt,outputt,name,title):
-	with open('Judge/'+name+'/'+title,"w") as inputf:	
-		inputf.write(inputt)	
-	outputf = open('Judge/ans/'+name+'/'+title,"w")
-	outputf.write(outputt)
-	outputf.close()
-
 @app.route("/question/<quesid>",methods=['GET'])
 def render_question(quesid):
 	if quesid: 
@@ -101,32 +98,22 @@ def render_question(quesid):
 	else:
 		return redirect('/userhome')
 
+@app.route("/submitQ",methods=["POST"])
+def submitQues():
+	_file = request.files["code"]
+	_user = str(session['user'])
+	_compiler = request.form['compiler']
+	_ques = request.form['ques']
+	filename = secure_filename(_file.filename)
+	filename = _user+'|'+filename+'|'+_compiler+'|'+_ques
+	_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+	return redirect("/userHome")
+
 @app.route("/")
 def main():
 	if session.get('user'):
 		fields.change('Logout','logout',session['user'])
 	return render_template("index.html",fields=fields,active='home')
-
-@app.route("/jury")
-def jury():
-	try :
-			if int(session['juryaccess']) == 1:
-				conn = mysql.connect()
-				cursor = conn.cursor()
-				cursor.callproc('getQuestions',((str(session['user'])),))
-				data = cursor.fetchall()
-				access = ques_list('header')
-				for i in range(len(data)):
-					access.questions.append(ques_d(data[i]))
-				if len(access.questions) is 0 : 
-					access.head = None
-				cursor.close()
-				conn.close()
-				return render_template('jury.html',fields=fields,questions=access)
-			else :
-				return render_template('error.html',fields=fields,error='Access to this part is restricted. If you are seeing this, please go away and never come back!')
-	except Exception as e :
-		return render_template('error.html',fields=fields,error=e) 
 
 @app.route("/userHome")
 def userHome():
@@ -138,11 +125,11 @@ def userHome():
 			data = cursor.fetchall()
 			attempted = ques_list('header')
 			unattempted = ques_list('header')
-			for i in range(7,len(data[0])):
+			for i in range(8,len(data[0])):
 				if data[0][i] == 0:
-					unattempted.questions.append(question(i-6))
+					unattempted.questions.append(question(i-7))
 				else :
-					attempted.questions.append(question(i-6))
+					attempted.questions.append(question(i-7))
 			if len(attempted.questions) is 0:
 				attempted.head = None
 			if len(unattempted.questions) is 0:
@@ -154,25 +141,6 @@ def userHome():
 			return render_template('signin.html',fields=fields)
 	except Exception as e:
 		return render_template('error.html',error=e,fields=fields)
-
-@app.route("/jury/addq")
-def addq():
-	return render_template("addq.html",fields=fields)
-
-@app.route("/jury/addQuestion",methods=['POST'])
-def addQuestion():
-	try :
-		test_case = []
-		_num = int(request.form['case_count'])
-		title = request.form['question-title']
-#		call(["cd ~/ESC101/conj/Judge"])
-#		call(["mkdir ~/ESC101/conj/Judge/"+title])
-#		call(["mkdir Judge/ans/"+title,""])
-		for i in range(_num):
-			writeCase(request.form['test'+i+'-input'],request.form['test'+i+'-output'],request.form['test'+i+'name'],title)
-		return 'Success'
-	except Exception as e : 
-		return str(e)
 
 @app.route("/showSignIn")
 def showSignIn():

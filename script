@@ -1,0 +1,7 @@
+#!/bin/bash
+
+while [ ! -f submissions/* ];
+do
+	sleep 2
+done
+./vader

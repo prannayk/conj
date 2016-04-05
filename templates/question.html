@@ -22,9 +22,16 @@
 	</div>
 	<div class="submission">
 		I am submitting code in : 
-		<select name="language">
-			<option default>-select-</option>
-			<option>C (gcc)</option>
-		</select>
+
+			<select name="compiler" form="work">
+				<option default value="none">-select-</option>
+				<option value="gcc">C (gcc)</option>
+			</select>
+		
+		<form id="work" method="POST" action="/submitQ" enctype="multipart/form-data">
+			<input type="hidden" name="ques" value={{ques.title}} />
+			<input type="file" name="code" />
+			<input type="submit">
+		</form>
 	</div>
 {% endblock %}

@@ -15,7 +15,7 @@
 			</tr>
 			{% for question in unattempted.questions %}
 				<tr>
-					<td><a href="{{question.link}}">{{question.title}}</a></td>
+					<td><a href={{question.link}}>{{question.title}}</a></td>
 					<td>{{question.attempt}}</td>
 					<td>{{question.vattempt}}</td>
 				</tr>

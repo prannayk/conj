@@ -4,6 +4,7 @@ import System.Process
 import qualified Data.ByteString.Char8 as Byte
 import Control.Concurrent
 import System.Exit
+import System.Directory(removeFile) 
 
 first :: [a] -> a
 first (x:xs) = x
@@ -22,4 +23,5 @@ mapping [] = do return Nothing
 main = do
 	input <- Byte.readFile "request.txt"
 	mapping $ give input
+	removeFile "request.txt"
 	return ()
