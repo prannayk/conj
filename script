@@ -1,7 +1,11 @@
 #!/bin/bash
 
-while [ ! -f submissions/* ];
+while: 
+do
+	echo "Working!"
+while [ grep "|" "request.txt" ];
 do
 	sleep 2
 done
 ./vader
+done

@@ -145,8 +145,7 @@ lineE (Right (bool,nominalDiffTime,_,integer)) = ((show)bool) ++ "|" ++ ((show)n
 writeLog :: [String] -> Rerror -> IO ()
 writeLog (user:ques:_) matter = do
   withFile (user++"/log.txt") AppendMode (\handle -> do hPutStrLn handle $ "\n" ++ user ++ "|" ++ (lineE matter) )
-  withFile (ques++"-log.txt") AppendMode (\handle -> do hPutStrLn handle $ "\n" ++ user ++ "|" ++ (lineE matter) )
-
+  withFile ("log.txt") AppendMode (\handle -> do hPutStr handle $ "\n" ++ user ++ "|" ++ ques ++ "|"++ (lineE matter))
 
 main = do
   inpu <- getArgs

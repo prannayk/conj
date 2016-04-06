@@ -7,7 +7,7 @@ import sys
 import os
 from werkzeug import secure_filename
 
-uploadF = "submissions"
+uploadF = "Judge/"
 
 app = Flask("Judge")
 app.config['UPLOAD_FOLDER'] = uploadF
@@ -106,7 +106,8 @@ def submitQues():
 	_ques = request.form['ques']
 	filename = secure_filename(_file.filename)
 	filename = _user+'|'+filename+'|'+_compiler+'|'+_ques
-	_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+	_file.save(os.path.join(app.config['UPLOAD_FOLDER']++_user++"/"++_ques, filename))
+	
 	return redirect("/userHome")
 
 @app.route("/")
