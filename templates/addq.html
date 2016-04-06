@@ -52,32 +52,34 @@ $(function(){
 {% endblock %}
 
 {%block content %}
-<form name="test-cases" method="POST" action="/jury/addQuestion">
-<input type="hidden" name="case_count" value="1"/>
-<div class="row">
-	<div class="col-md-3">
-		<label for="question-title">Header:</label>
+<form name="test-cases" method="POST" action="/jury/addQuestion" role="form">
+<div class="form-group">
+	<input type="hidden" name="case_count" value="1"/>
+	<div class="row">
+		<div class="col-md-3">
+			<label for="question-title">Header:</label>
+		</div>
+		<div class="col-md-9">
+			<input type="text" name="question-title" placeholder="Question Title">
+		</div>
 	</div>
-	<div class="col-md-9">
-		<input type="text" name="question-title" placeholder="Question Title">
+	<div class="row">
+		<div class="col-md-10">
+			<textarea name="question_content"></textarea>	
+		</div>
 	</div>
+	<div class="case-list">
+		<div class="test-case">
+			<input class="form-control" type="checkbox" checked name="test1-activity" />
+			<input class="form-control" type="text" name="test1-name" placeholder="Name of test case"/>
+			<textarea name="test1-input"></textarea>
+			<textarea name="test1-output"></textarea>
+		</div>
+		<div class="test-case">
+			<p class="add-case"><a href="#" id="add-case">+</a></p>
+		</div>
+	</div>
+	<a href="#" id="submit-cases">Submit</a>
 </div>
-<div class="row">
-	<div class="col-md-10">
-		<textarea name="question_content"></textarea>	
-	</div>
-</div>
-<div class="case-list">
-	<div class="test-case">
-		<input type="checkbox" checked name="test1-activity" />
-		<input type="text" name="test1-name" placeholder="Name of test case"/>
-		<textarea name="test1-input"></textarea>
-		<textarea name="test1-output"></textarea>
-	</div>
-	<div class="test-case">
-		<p class="add-case"><a href="#" id="add-case">+</a></p>
-	</div>
-</div>
-<a href="#" id="submit-cases">Submit</a>
 </form>
 {% endblock %}

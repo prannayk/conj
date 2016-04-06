@@ -106,6 +106,7 @@ def submitQues():
 	_compiler = request.form['compiler']
 	_ques = request.form['ques']
 	filename = str(_ques)+".c"
+	call(["mkdir","Judge/"+_user+"/"+_ques])
 	_file.save(os.path.join(app.config['UPLOAD_FOLDER']+str(_user)+"/"+str(_ques), filename))
 	target = open("Judge/request.txt","w")
 	target.truncate()
@@ -220,11 +221,12 @@ def signUp():
 		_username = request.form['inputUsername']
 		_selective_hash = bcrypt.generate_password_hash(_username)
 		cursor.callproc('createUser',(_name,_email,_username,_password,_selective_hash))
+		call(["mkdir","Judge/"+_username])
 		data = cursor.fetchall()
 		if len(data) is 0:
 			conn.commit()
-			return render_template('confirmmail.html',fields=fields)
 			session['confirm'] = False
+			return redirect("/")
 		else:
 			return redirect("/")
 	except Exception as e:

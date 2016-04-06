@@ -5,7 +5,7 @@
 	<p>Welcome, <i>{{fields.name}}</i></p>
 	{% endif %}
 	{% if unattempted.head %}
-		<h4>Unattempted Questions</h4>
+		<h4>Unattempted / wrongly attempted Questions</h4>
 	<div class="question list">
 		<table class="table">
 			<tr>
@@ -15,7 +15,7 @@
 			</tr>
 			{% for question in unattempted.questions %}
 				<tr>
-					<td><a href={{question.link}}>{{question.title}}</a></td>
+					<td><a href="{{question.link}}">{{question.title}}</a></td>
 					<td>{{question.attempt}}</td>
 					<td>{{question.vattempt}}</td>
 				</tr>
@@ -24,7 +24,7 @@
 	</div>
 	{% endif %}
 	{% if attempted.head %}
-	<h4>Attempted Questions</h4>
+	<h4>Correctly Attempted Questions</h4>
 	<div class="question list">
 		<table class="table">
 			<tr>
@@ -35,8 +35,8 @@
 			{% for question in attempted.questions %}
 				<tr>
 					<td><a href="{{question.link}}">{{question.title}}</a></td>
-					<td>{{question.attempts}}</td>
-					<td>{{question.validAttempts}}</td>
+					<td>{{question.attempt}}</td>
+					<td>{{question.vattempt}}</td>
 				</tr>
 			{% endfor %}
 		</table>

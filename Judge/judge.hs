@@ -41,7 +41,7 @@ checkResult hout some inputf= (do
 
 testThis :: String -> String -> String -> IO (Rerror)
 testThis some cas user= do
-  setResourceLimit ResourceCPUTime ResourceLimits{hardLimit = ResourceLimit 150000, softLimit = ResourceLimit 100000}
+  --setResourceLimit ResourceCPUTime ResourceLimits{hardLimit = ResourceLimit 5, softLimit = ResourceLimit 1}
   (Just hin,Just hout, _,handle) <- createProcess (proc (user++"/"++some++"/"++some) []){std_out =  CreatePipe, std_in = CreatePipe}
   hSetBuffering hin NoBuffering
   inputf <- openFile (some++"/"++cas) ReadMode

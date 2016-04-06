@@ -1,4 +1,12 @@
 {% extends 'layout.html' %}
+{% block head %}
+	<style type="text/css">
+	input{
+		margin: 8px 0;
+		padding: 6px; 
+	}
+	</style>
+{% endblock %}
 {% block content %}
 	<h4>{{ques.title}}</h4>
 	<div class="stats">
@@ -28,10 +36,12 @@
 				<option value="gcc">C (gcc)</option>
 			</select>
 		
-		<form id="work" method="POST" action="/submitQ" enctype="multipart/form-data">
-			<input type="hidden" name="ques" value={{ques.id}} />
-			<input type="file" name="code" />
-			<input type="submit">
+		<form id="work" method="POST" action="/submitQ" enctype="multipart/form-data" role="form" class="form-horizontal">
+			<div class="form-group">
+				<input class="form-control" type="hidden" name="ques" value={{ques.id}} />
+				<input class="form-control" type="file" name="code" />
+				<input class="form-control btn btn-default" type="submit">
+			</div>
 		</form>
 	</div>
 {% endblock %}
