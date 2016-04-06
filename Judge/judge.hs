@@ -41,7 +41,7 @@ checkResult hout some inputf= (do
 
 testThis :: String -> String -> String -> IO (Rerror)
 testThis some cas user= do
-  setResourceLimit ResourceCPUTime ResourceLimits{hardLimit = ResourceLimit 5, softLimit = ResourceLimit 4}
+  setResourceLimit ResourceCPUTime ResourceLimits{hardLimit = ResourceLimit 150000, softLimit = ResourceLimit 100000}
   (Just hin,Just hout, _,handle) <- createProcess (proc (user++"/"++some++"/"++some) []){std_out =  CreatePipe, std_in = CreatePipe}
   hSetBuffering hin NoBuffering
   inputf <- openFile (some++"/"++cas) ReadMode
@@ -145,7 +145,7 @@ lineE (Right (bool,nominalDiffTime,_,integer)) = ((show)bool) ++ "|" ++ ((show)n
 writeLog :: [String] -> Rerror -> IO ()
 writeLog (user:ques:_) matter = do
   withFile (user++"/log.txt") AppendMode (\handle -> do hPutStrLn handle $ "\n" ++ user ++ "|" ++ (lineE matter) )
-  withFile ("log.txt") AppendMode (\handle -> do hPutStr handle $ "\n" ++ user ++ "|" ++ ques ++ "|"++ (lineE matter))
+  withFile ("log.txt") AppendMode (\handle -> do hPutStr handle $ "\n" ++ user ++ "|" ++ ques ++ "|"++ (lineE matter) ++ "\n\n")
 
 main = do
   inpu <- getArgs

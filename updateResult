@@ -1,0 +1,15 @@
+#!/bin/bash
+
+while read line
+do
+	IFS="|" read -a arr <<< "$line"
+	echo ${arr[3]}
+	if [ "${arr[2]}" = "True" ] 
+	then
+		mysql --user="root" --password="drasnac32" -e "USE conj; call updateScore('${arr[0]}','${arr[1]}')"	
+		mysql --user="root" --password="drasnac32" -e "USE conj; UPDATE \`users\` SET \`user_score\`=\`user_score\` + 10 where \`user_username\` = '${arr[0]}' AND \`${arr[1]}\`=0;"
+		mysql --user="root" --password="drasnac32" -e "USE conj; UPDATE \`users\` SET \`${arr[1]}\`=100 where \`user_username\` = '${arr[0]}';"
+		echo "Completed for: ${arr[0]} :: ${arr[1]}"
+	fi
+done < "Judge/log.txt"
+mv Judge/log.txt Judge/logger.txt

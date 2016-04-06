@@ -68,6 +68,7 @@ class qdesc():
 		self.attempt = attempt
 		self.content = content
 		self.link = 'question/'+str(id)
+		self.id = id
 
 def question(id):
 	conn = mysql.connect()
@@ -104,9 +105,13 @@ def submitQues():
 	_user = str(session['user'])
 	_compiler = request.form['compiler']
 	_ques = request.form['ques']
-	filename = secure_filename(_file.filename)
-	filename = _user+'|'+filename+'|'+_compiler+'|'+_ques
-	_file.save(os.path.join(app.config['UPLOAD_FOLDER']++_user++"/"++_ques, filename))
+	filename = str(_ques)+".c"
+	_file.save(os.path.join(app.config['UPLOAD_FOLDER']+str(_user)+"/"+str(_ques), filename))
+	target = open("Judge/request.txt","w")
+	target.truncate()
+	target.write(str(_user)+"|"+str(_ques))
+	target.write("\n")
+	target.close()
 	
 	return redirect("/userHome")
 

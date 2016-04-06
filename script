@@ -1,11 +1,18 @@
 #!/bin/bash
 
-while: 
+while true 
 do
-	echo "Working!"
-while [ grep "|" "request.txt" ];
-do
-	sleep 2
-done
-./vader
+	if [ -f "Judge/request.txt" ]; then
+		while [ grep "|" "request.txt" ];
+		do
+			sleep 1
+		done
+		cd Judge
+		./vader
+		sleep 3
+		cd ..
+		./updateResult
+	else 
+		sleep 1
+	fi
 done
