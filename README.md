@@ -1,5 +1,5 @@
 # conj
-* Online Judge for Programs written in C
+* Online Judge for Programs written in C/Haskell
 * ESC101 Project 
 
 # Successfully Deployed
